@@ -47,10 +47,10 @@
             width: 100%; height: 100%; position: relative;
         }
 
-        /* UI панель */
+        /* UI панель (ПК) */
         .ui-panel {
             position: absolute;
-            bottom: 300px; 
+            bottom: 300px; /* Над кучей (30 + 250 + 20) */
             left: 40px;
             width: 330px; 
             box-sizing: border-box;
@@ -90,11 +90,11 @@
         }
         .btn:hover { background: linear-gradient(to bottom, #a87225, #5c3b0f); color: #fff; box-shadow: 0 0 10px #b8860b; }
         .btn:active { transform: scale(0.95); }
-        .hidden-btn { display: none !important; } /* Класс для скрытия кнопок */
+        .hidden-btn { display: none !important; }
 
         .date-display { color: rgba(245, 222, 179, 0.4); font-size: 11px; margin-top: 5px; }
 
-        /* Зона с кучей книг */
+        /* Зона с кучей книг (ПК) */
         #book-pile {
             position: absolute; bottom: 30px; left: 40px;
             width: 330px; height: 250px; z-index: 5;
@@ -178,13 +178,44 @@
 
         /* --- МОБИЛЬНАЯ АДАПТАЦИЯ (Ландшафт) --- */
         @media screen and (max-height: 500px), screen and (max-width: 900px) {
-            .ui-panel { transform: scale(0.85); transform-origin: left bottom; bottom: 20px; left: 20px; }
-            #book-pile { width: 280px; height: 180px; bottom: 20px; left: 20px; }
-            #victory-text { width: 280px; height: 180px; bottom: 20px; left: 20px; font-size: 24px; }
-            #shelves-container { width: calc(100% - 320px); right: 20px; top: 20px; gap: 15px; height: calc(100% - 40px); }
-            .shelf { height: 60px; border-bottom: 8px solid #3d2314; }
-            .book { width: 10px; height: 45px; } /* Узкие книги для смартфона */
-            .book::after { top: 6px; height: 2px; box-shadow: 0 25px 0 #b8860b; }
+            
+            /* Зона с кучей (уменьшена) */
+            #book-pile { 
+                width: 250px; height: 130px; 
+                bottom: 10px; left: 15px; 
+            }
+            #victory-text { 
+                width: 250px; height: 130px; 
+                bottom: 10px; left: 15px; font-size: 22px; 
+            }
+
+            /* UI Панель над кучей (строго фиксирована, уменьшены отступы и шрифты) */
+            .ui-panel { 
+                width: 250px; 
+                bottom: 150px; /* 10 (отступ) + 130 (высота кучи) + 10 (зазор) */
+                left: 15px; 
+                padding: 8px 12px;
+                gap: 5px;
+            }
+            .ui-panel h1 { font-size: 14px; letter-spacing: 1px; }
+            .ui-panel p.subtitle { font-size: 12px; }
+            .ui-panel .btn { font-size: 11px; padding: 6px; }
+            .ui-panel .date-display { font-size: 10px; margin-top: 2px; }
+
+            /* Полки */
+            #shelves-container { 
+                width: calc(100% - 290px); /* Отступ слева 250 + 15 + 25 на зазор */
+                right: 15px; top: 15px; 
+                gap: 12px; height: calc(100% - 30px); 
+            }
+            .shelf { 
+                height: 50px; /* Узкие полки */
+                border-bottom: 8px solid #3d2314; 
+            }
+            
+            /* Книги для телефона */
+            .book { width: 11px; height: 42px; } 
+            .book::after { top: 6px; height: 2px; box-shadow: 0 22px 0 #b8860b; }
             .shelf .book { margin-right: 1px !important; }
         }
     </style>
@@ -316,12 +347,12 @@
         }
 
         function resetGame() {
-            gameStarted = true; // Сразу начинаем заново
+            gameStarted = true; 
             isPaused = false;
             placedBooks = 0;
             scoreElement.innerText = placedBooks;
             
-            // Восстановление UI после победы
+            // Восстановление UI
             pile.style.opacity = '1';
             pile.style.pointerEvents = 'auto';
             victoryText.style.opacity = '0';
@@ -330,7 +361,7 @@
             startBtn.classList.add('hidden-btn');
             pauseBtn.classList.remove('hidden-btn');
             resetBtn.classList.remove('hidden-btn');
-            startBtn.innerText = "Начать"; // Возвращаем текст
+            startBtn.innerText = "Начать"; 
             pauseScreen.style.display = 'none';
             
             stopTimer();
@@ -368,16 +399,14 @@
         function checkVictory() {
             if (placedBooks >= totalBooks) {
                 stopTimer();
-                // Меняем кнопки
+                
                 pauseBtn.classList.add('hidden-btn');
                 resetBtn.classList.add('hidden-btn');
                 startBtn.classList.remove('hidden-btn');
                 startBtn.innerText = "Начать заново";
                 
-                // Меняем текст таймера
                 timerLabel.innerHTML = 'Итог: <span id="timer-display">' + formatTime(secondsElapsed) + '</span>';
                 
-                // Показываем надпись
                 pile.style.opacity = '0';
                 pile.style.pointerEvents = 'none';
                 victoryText.style.opacity = '1';
@@ -386,17 +415,19 @@
             }
         }
 
+        // Обновленная функция разброса книг (с учетом экрана телефона)
         function randomizeBookInPile(book) {
             let isMobile = window.innerWidth <= 900 || window.innerHeight <= 500;
-            let radiusX = isMobile ? 120 : 140;
-            let radiusY = isMobile ? 70 : 100;
-            let centerX = isMobile ? 140 : 165;
-            let centerY = isMobile ? 90 : 125;
+            // Размеры кучи на телефоне 250х130, на ПК 330х250
+            let radiusX = isMobile ? 100 : 140;
+            let radiusY = isMobile ? 45 : 100;
+            let centerX = isMobile ? 125 : 165;
+            let centerY = isMobile ? 65 : 125;
 
             let angle = Math.random() * Math.PI * 2;
             let r = Math.random();
             let x = centerX + Math.sqrt(r) * radiusX * Math.cos(angle) - (isMobile ? 5 : 9);
-            let y = centerY + Math.sqrt(r) * radiusY * Math.sin(angle) - (isMobile ? 22 : 40);
+            let y = centerY + Math.sqrt(r) * radiusY * Math.sin(angle) - (isMobile ? 21 : 40);
             let rotation = Math.random() * 180 - 90;
 
             book.style.position = 'absolute';
@@ -454,7 +485,6 @@
             draggedBook.style.opacity = '0.7';
             draggedBook.style.zIndex = '1000';
             
-            // Отрываем книгу и привязываем к экрану для свободного перемещения
             if (initialParent !== document.body) {
                 draggedBook.style.position = 'absolute';
                 draggedBook.style.left = rect.left + 'px';
@@ -476,7 +506,6 @@
             if (!draggedBook) return;
             const touch = e.changedTouches[0];
             
-            // Прячем временно, чтобы узнать, что находится под пальцем
             draggedBook.style.display = 'none';
             let dropElement = document.elementFromPoint(touch.clientX, touch.clientY);
             draggedBook.style.display = 'block';
@@ -487,7 +516,6 @@
             let targetShelf = dropElement ? dropElement.closest('.shelf') : null;
             let targetPile = dropElement ? dropElement.closest('#book-pile') : null;
 
-            // Восстанавливаем родителя перед перемещением, чтобы moveBook корректно посчитал очки
             initialParent.appendChild(draggedBook); 
 
             if (targetShelf) {
@@ -495,13 +523,12 @@
             } else if (targetPile) {
                 moveBook(draggedBook, pile, true);
             } else {
-                // Если бросили мимо - возвращаем туда, откуда взяли
                 moveBook(draggedBook, initialParent, initialParent.id === 'book-pile');
             }
             draggedBook = null;
         }
 
-        // Общая логика перемещения и подсчета очков (для мыши и сенсора)
+        // Общая логика перемещения и подсчета очков
         function moveBook(book, targetZone, isPile) {
             let sourcePile = book.parentElement.id === 'book-pile';
             
