@@ -2,10 +2,10 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ПОРЯДОК В БИБЛИОТЕКЕ</title>
     <style>
-        /* Основные стили, фон и шрифт */
+        /* Основные стили и фон */
         body, html {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
@@ -15,6 +15,8 @@
             background-size: cover;
             background-position: center;
             user-select: none;
+            -webkit-user-select: none; /* Запрет выделения на iOS */
+            touch-action: none; /* Запрет скролла при касании */
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         }
 
@@ -24,17 +26,38 @@
             pointer-events: none; z-index: 1;
         }
 
+        /* Экран поворота устройства */
+        #rotate-device {
+            display: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: #ffd700; z-index: 9999;
+            justify-content: center; align-items: center; text-align: center;
+            flex-direction: column; padding: 20px; box-sizing: border-box;
+        }
+        #rotate-device h2 { font-size: 24px; margin-bottom: 10px; }
+        #rotate-device p { font-size: 16px; color: #f5deb3; }
+
+        @media screen and (orientation: portrait) {
+            #rotate-device { display: flex; }
+            #game-container { display: none; }
+        }
+
+        /* Контейнер игры */
+        #game-container {
+            width: 100%; height: 100%; position: relative;
+        }
+
         /* UI панель */
         .ui-panel {
             position: absolute;
             bottom: 300px; 
             left: 40px;
-            width: 350px; 
+            width: 330px; 
             box-sizing: border-box;
             background: rgba(20, 10, 5, 0.85);
             border: 2px solid #b8860b;
             border-radius: 10px;
-            padding: 15px 20px 10px 20px;
+            padding: 12px 20px;
             box-shadow: 0 0 20px rgba(184, 134, 11, 0.5), inset 0 0 15px rgba(184, 134, 11, 0.3);
             z-index: 10;
             text-align: center;
@@ -42,171 +65,90 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         h1 {
-            color: #ffd700;
-            margin: 0;
-            font-size: 20px;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(255, 140, 0, 0.8);
+            color: #ffd700; margin: 0; font-size: 18px;
+            letter-spacing: 2px; text-shadow: 0 0 10px rgba(255, 140, 0, 0.8);
             font-weight: bold;
         }
-
-        p.subtitle {
-            color: #f5deb3;
-            font-size: 16px;
-            margin: 0;
-            letter-spacing: 1px;
-        }
+        p.subtitle { color: #f5deb3; font-size: 14px; margin: 0; letter-spacing: 1px; }
 
         /* Кнопки в UI панели */
         .btn-group {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-            margin-top: 5px;
+            display: flex; gap: 10px; width: 100%; margin-top: 5px;
         }
-
         .btn {
             background: linear-gradient(to bottom, #8a5a19, #4a2f0b);
-            border: 1px solid #ffd700;
-            color: #f5deb3;
-            font-family: inherit;
-            border-radius: 5px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.8);
-            transition: all 0.2s;
-            box-sizing: border-box;
-            flex: 1;
-            padding: 8px;
-            font-size: 13px;
+            border: 1px solid #ffd700; color: #f5deb3;
+            font-family: inherit; font-size: 13px; font-weight: bold;
+            border-radius: 5px; cursor: pointer; text-transform: uppercase;
+            letter-spacing: 1px; box-shadow: 0 2px 5px rgba(0,0,0,0.8);
+            transition: all 0.2s; box-sizing: border-box;
+            flex: 1; padding: 8px;
         }
-        .btn:hover {
-            background: linear-gradient(to bottom, #a87225, #5c3b0f);
-            color: #fff;
-            box-shadow: 0 0 10px #b8860b;
-        }
+        .btn:hover { background: linear-gradient(to bottom, #a87225, #5c3b0f); color: #fff; box-shadow: 0 0 10px #b8860b; }
         .btn:active { transform: scale(0.95); }
+        .hidden-btn { display: none !important; } /* Класс для скрытия кнопок */
 
-        /* Кнопки для оверлей-экранов (Центральные, фиксированного размера) */
-        .btn-overlay {
-            width: 160px;
-            height: 42px;
-            background: linear-gradient(to bottom, #8a5a19, #4a2f0b);
-            border: 1px solid #ffd700;
-            color: #f5deb3;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.9);
-            transition: all 0.2s;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 101;
-        }
-        .btn-overlay:hover {
-            background: linear-gradient(to bottom, #a87225, #5c3b0f);
-            color: #fff;
-            box-shadow: 0 0 15px #b8860b;
-        }
-        .btn-overlay:active { transform: scale(0.95); }
-
-        /* Дата */
-        .date-display {
-            color: rgba(245, 222, 179, 0.4); 
-            font-size: 12px;
-            margin-top: 5px;
-            letter-spacing: 1px;
-        }
+        .date-display { color: rgba(245, 222, 179, 0.4); font-size: 11px; margin-top: 5px; }
 
         /* Зона с кучей книг */
         #book-pile {
-            position: absolute;
-            bottom: 30px;
-            left: 40px;
-            width: 350px;
-            height: 250px;
-            z-index: 5;
+            position: absolute; bottom: 30px; left: 40px;
+            width: 330px; height: 250px; z-index: 5;
             background: rgba(0, 0, 0, 0.4);
             border: 2px dashed rgba(184, 134, 11, 0.5);
-            border-radius: 20px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-            transition: all 0.3s ease;
+            border-radius: 20px; box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            transition: opacity 0.5s ease;
         }
-        
-        #book-pile.drag-over {
-            background: rgba(184, 134, 11, 0.2);
-            border: 2px solid #ffd700;
+        #book-pile.drag-over { background: rgba(184, 134, 11, 0.2); border: 2px solid #ffd700; }
+
+        /* Текст Победы (на месте кучи) */
+        #victory-text {
+            position: absolute; bottom: 30px; left: 40px;
+            width: 330px; height: 250px; z-index: 4;
+            display: flex; justify-content: center; align-items: center;
+            color: #ffd700; font-size: 32px; font-weight: bold; text-transform: uppercase;
+            text-align: center; text-shadow: 0 0 20px #ff8c00, 2px 2px 5px black;
+            opacity: 0; transition: opacity 1s ease; pointer-events: none;
         }
 
         /* Контейнер полок */
         #shelves-container {
-            position: absolute;
-            top: 50px;
-            right: 40px;
-            width: calc(100% - 460px); 
-            max-width: 1000px;
-            height: calc(100% - 80px);
-            z-index: 5;
-            display: flex;
-            flex-direction: column;
-            gap: 35px;
+            position: absolute; top: 50px; right: 40px;
+            width: calc(100% - 420px); max-width: 1000px;
+            height: calc(100% - 80px); z-index: 5;
+            display: flex; flex-direction: column; gap: 35px;
         }
 
         /* Полка */
         .shelf {
-            width: 100%;
-            height: 100px;
+            width: 100%; height: 100px;
             background: rgba(43, 23, 11, 0.7);
-            border-bottom: 15px solid #3d2314;
-            border-radius: 5px;
+            border-bottom: 15px solid #3d2314; border-radius: 5px;
             box-shadow: 0 10px 15px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.9);
-            display: flex;
-            align-items: flex-end; 
-            justify-content: flex-start;
-            flex-wrap: nowrap; 
-            padding: 0 10px;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
+            display: flex; align-items: flex-end; justify-content: flex-start;
+            flex-wrap: nowrap; padding: 0 10px; box-sizing: border-box;
         }
-
-        .shelf.drag-over {
-            box-shadow: 0 10px 15px rgba(0,0,0,0.8), inset 0 0 30px #b8860b;
-            border-bottom: 15px solid #6b4423;
-        }
+        .shelf.drag-over { box-shadow: 0 10px 15px rgba(0,0,0,0.8), inset 0 0 30px #b8860b; border-bottom: 15px solid #6b4423; }
 
         /* Книги */
         .book {
-            width: 18px; 
-            height: 80px;
-            border-radius: 3px;
-            cursor: grab;
+            width: 18px; height: 80px; border-radius: 3px; cursor: grab;
             position: absolute;
             box-shadow: -2px 0 5px rgba(0,0,0,0.6), inset 2px 0 5px rgba(255,255,255,0.2);
             border: 1px solid rgba(0,0,0,0.8);
-            transition: opacity 0.1s;
         }
         .book:active { cursor: grabbing; }
 
         .shelf .book {
-            position: relative !important;
-            top: auto !important; left: auto !important; bottom: 0 !important;
-            transform: none !important; 
-            margin-right: 2px !important; margin-bottom: 0 !important;
-            flex-shrink: 1; 
+            position: relative !important; top: auto !important; left: auto !important; bottom: 0 !important;
+            transform: none !important; margin-right: 2px !important; margin-bottom: 0 !important;
+            flex-shrink: 1; z-index: 10 !important;
         }
 
-        /* Цвета обложек */
         .book.red { background: linear-gradient(to right, #601010, #8a1c1c, #601010); }
         .book.blue { background: linear-gradient(to right, #102040, #1c3560, #102040); }
         .book.green { background: linear-gradient(to right, #103015, #1c5025, #103015); }
@@ -214,95 +156,82 @@
         .book.purple { background: linear-gradient(to right, #301040, #4f1c6a, #301040); }
 
         .book::after {
-            content: ''; position: absolute; top: 12px; left: 0;
-            width: 100%; height: 4px; background: #b8860b;
-            box-shadow: 0 50px 0 #b8860b; opacity: 0.7;
+            content: ''; position: absolute; top: 12px; left: 0; width: 100%; height: 4px;
+            background: #b8860b; box-shadow: 0 50px 0 #b8860b; opacity: 0.7; pointer-events: none;
         }
 
-        /* Экраны (Старт, Пауза, Победа) */
-        .overlay-screen {
+        /* Экран Паузы */
+        #pause-screen {
+            display: none;
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(8px);
-            z-index: 100;
-            display: flex;
-            justify-content: center; 
-            align-items: center; 
-            flex-direction: column;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 100;
+            justify-content: center; align-items: center; flex-direction: column;
+        }
+        .btn-overlay {
+            width: 160px; height: 42px;
+            background: linear-gradient(to bottom, #8a5a19, #4a2f0b);
+            border: 1px solid #ffd700; color: #f5deb3;
+            font-family: inherit; font-size: 14px; font-weight: bold;
+            border-radius: 5px; cursor: pointer; text-transform: uppercase;
+            letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.9);
         }
 
-        /* Специфичный стиль для экрана ПОБЕДЫ (прозрачный фон) */
-        #victory.overlay-screen {
-            background: transparent;
-            backdrop-filter: none;
-        }
-
-        .overlay-screen.hidden {
-            display: none !important;
-        }
-        
-        .overlay-screen h2 {
-            color: #ffd700; font-size: 36px; text-transform: uppercase;
-            letter-spacing: 3px; text-shadow: 0 0 20px #ff8c00; 
-            margin: 0 0 15px 0;
-        }
-
-        /* Тени для текста на экране победы (чтобы читалось без фона) */
-        #victory h2 {
-            text-shadow: 2px 2px 8px black, 0 0 20px #ff8c00, 0 0 40px #ff8c00;
-        }
-        #victory .subtitle {
-            text-shadow: 2px 2px 5px black, 0 0 15px black;
-            font-weight: bold;
+        /* --- МОБИЛЬНАЯ АДАПТАЦИЯ (Ландшафт) --- */
+        @media screen and (max-height: 500px), screen and (max-width: 900px) {
+            .ui-panel { transform: scale(0.85); transform-origin: left bottom; bottom: 20px; left: 20px; }
+            #book-pile { width: 280px; height: 180px; bottom: 20px; left: 20px; }
+            #victory-text { width: 280px; height: 180px; bottom: 20px; left: 20px; font-size: 24px; }
+            #shelves-container { width: calc(100% - 320px); right: 20px; top: 20px; gap: 15px; height: calc(100% - 40px); }
+            .shelf { height: 60px; border-bottom: 8px solid #3d2314; }
+            .book { width: 10px; height: 45px; } /* Узкие книги для смартфона */
+            .book::after { top: 6px; height: 2px; box-shadow: 0 25px 0 #b8860b; }
+            .shelf .book { margin-right: 1px !important; }
         }
     </style>
 </head>
 <body>
+    <!-- Заглушка для портретного режима -->
+    <div id="rotate-device">
+        <h2>Поверните устройство</h2>
+        <p>Игра предназначена для горизонтального режима</p>
+    </div>
 
-    <canvas id="particles"></canvas>
+    <!-- Основной контейнер игры -->
+    <div id="game-container">
+        <canvas id="particles"></canvas>
 
-    <!-- UI Панель над кучей -->
-    <div class="ui-panel">
-        <h1>ПОРЯДОК В БИБЛИОТЕКЕ</h1>
-        <p class="subtitle">Время: <span id="timer-display">00:00</span></p>
-        <p class="subtitle">Расставлено: <span id="score">0</span> / 200</p>
-        
-        <div class="btn-group">
-            <button class="btn" id="pause-btn">Пауза</button>
-            <button class="btn" id="reset-btn">Заново</button>
+        <!-- UI Панель -->
+        <div class="ui-panel">
+            <h1>ПОРЯДОК В БИБЛИОТЕКЕ</h1>
+            <p class="subtitle" id="timer-label">Время: <span id="timer-display">00:00</span></p>
+            <p class="subtitle">Расставлено: <span id="score">0</span> / 200</p>
+            
+            <div class="btn-group">
+                <button class="btn" id="start-btn">Начать</button>
+                <button class="btn hidden-btn" id="pause-btn">Пауза</button>
+                <button class="btn hidden-btn" id="reset-btn">Заново</button>
+            </div>
+            
+            <div class="date-display" id="date-display"></div>
         </div>
-        
-        <div class="date-display" id="date-display"></div>
-    </div>
 
-    <!-- Куча книг -->
-    <div id="book-pile" ondrop="dropOnPile(event)" ondragover="allowDrop(event)" ondragenter="dragEnterZone(event)" ondragleave="dragLeaveZone(event)"></div>
+        <!-- Зона кучи и текст победы -->
+        <div id="book-pile"></div>
+        <div id="victory-text">Идеальный<br>порядок</div>
 
-    <!-- Полки для книг -->
-    <div id="shelves-container">
-        <div class="shelf" ondrop="dropOnShelf(event)" ondragover="allowDrop(event)" ondragenter="dragEnterZone(event)" ondragleave="dragLeaveZone(event)"></div>
-        <div class="shelf" ondrop="dropOnShelf(event)" ondragover="allowDrop(event)" ondragenter="dragEnterZone(event)" ondragleave="dragLeaveZone(event)"></div>
-        <div class="shelf" ondrop="dropOnShelf(event)" ondragover="allowDrop(event)" ondragenter="dragEnterZone(event)" ondragleave="dragLeaveZone(event)"></div>
-        <div class="shelf" ondrop="dropOnShelf(event)" ondragover="allowDrop(event)" ondragenter="dragEnterZone(event)" ondragleave="dragLeaveZone(event)"></div>
-        <div class="shelf" ondrop="dropOnShelf(event)" ondragover="allowDrop(event)" ondragenter="dragEnterZone(event)" ondragleave="dragLeaveZone(event)"></div>
-    </div>
+        <!-- Полки -->
+        <div id="shelves-container">
+            <div class="shelf"></div>
+            <div class="shelf"></div>
+            <div class="shelf"></div>
+            <div class="shelf"></div>
+            <div class="shelf"></div>
+        </div>
 
-    <!-- Экран Старта -->
-    <div class="overlay-screen" id="start-screen">
-        <h2>Наведите порядок в библиотеке</h2>
-        <button class="btn-overlay" id="start-btn">Начать</button>
-    </div>
-
-    <!-- Экран Паузы -->
-    <div class="overlay-screen hidden" id="pause-screen">
-        <button class="btn-overlay" id="resume-btn">Продолжить</button>
-    </div>
-
-    <!-- Экран победы -->
-    <div class="overlay-screen hidden" id="victory">
-        <h2>Идеальный порядок!</h2>
-        <p class="subtitle" style="font-size: 20px; margin-bottom: 10px;">Ваше время: <span id="final-time"></span></p>
-        <button class="btn-overlay" id="victory-reset-btn" style="width: 180px;">Начать заново</button>
+        <!-- Экран Паузы -->
+        <div id="pause-screen">
+            <button class="btn-overlay" id="resume-btn">Продолжить</button>
+        </div>
     </div>
 
     <script>
@@ -312,38 +241,39 @@
         const colorTypes = ['red', 'blue', 'green', 'brown', 'purple'];
         const pile = document.getElementById('book-pile');
         const scoreElement = document.getElementById('score');
+        const victoryText = document.getElementById('victory-text');
+        const shelves = document.querySelectorAll('.shelf');
         let allBooks = []; 
 
-        // Таймер и состояния игры
+        // Таймер и состояния
         let secondsElapsed = 0;
         let timerInterval = null;
         let isPaused = false;
         let gameStarted = false; 
         const timerDisplay = document.getElementById('timer-display');
+        const timerLabel = document.getElementById('timer-label');
 
-        // Элементы экранов
-        const startScreen = document.getElementById('start-screen');
+        // Кнопки
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const resumeBtn = document.getElementById('resume-btn');
         const pauseScreen = document.getElementById('pause-screen');
-        const victoryScreen = document.getElementById('victory');
 
-        // Установка текущей даты
-        const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-        document.getElementById('date-display').innerText = new Date().toLocaleDateString('ru-RU', dateOptions);
+        document.getElementById('date-display').innerText = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
 
-        // --- ПРИВЯЗКА КНОПОК К СОБЫТИЯМ ---
-        document.getElementById('start-btn').addEventListener('click', startGame);
-        document.getElementById('resume-btn').addEventListener('click', togglePause);
-        document.getElementById('pause-btn').addEventListener('click', togglePause);
-        document.getElementById('reset-btn').addEventListener('click', resetGame);
-        document.getElementById('victory-reset-btn').addEventListener('click', resetGame);
+        // Привязка кнопок
+        startBtn.addEventListener('click', startGame);
+        pauseBtn.addEventListener('click', togglePause);
+        resumeBtn.addEventListener('click', togglePause);
+        resetBtn.addEventListener('click', resetGame);
 
-        // --- ИНИЦИАЛИЗАЦИЯ И УПРАВЛЕНИЕ ИГРОЙ ---
+        // --- ИНИЦИАЛИЗАЦИЯ ИГРЫ ---
         function initGame() {
             let colorsArray = [];
             colorTypes.forEach(color => {
                 for(let i = 0; i < (totalBooks / colorTypes.length); i++) colorsArray.push(color);
             });
-
             for (let i = colorsArray.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [colorsArray[i], colorsArray[j]] = [colorsArray[j], colorsArray[i]];
@@ -353,163 +283,120 @@
                 let book = document.createElement('div');
                 book.className = 'book ' + colorsArray[i];
                 book.id = 'book-' + i;
-                book.draggable = true;
                 
+                // Для ПК
+                book.draggable = true;
                 book.addEventListener('dragstart', dragStart);
+                
+                // Для Смартфонов (Touch)
+                book.addEventListener('touchstart', touchStart, {passive: false});
+                book.addEventListener('touchmove', touchMove, {passive: false});
+                book.addEventListener('touchend', touchEnd);
+                
                 pile.appendChild(book);
                 allBooks.push(book);
-                
                 randomizeBookInPile(book);
             }
         }
 
+        // --- ЛОГИКА ИНТЕРФЕЙСА И ТАЙМЕРА ---
         function startGame() {
-            startScreen.classList.add('hidden');
+            if (placedBooks >= totalBooks) { resetGame(); return; } // Если нажали после победы
+            
             gameStarted = true;
             isPaused = false;
+            
+            // Смена кнопок
+            startBtn.classList.add('hidden-btn');
+            pauseBtn.classList.remove('hidden-btn');
+            resetBtn.classList.remove('hidden-btn');
+            
+            timerLabel.innerHTML = 'Время: <span id="timer-display">' + timerDisplay.innerText + '</span>';
             startTimer();
         }
 
         function resetGame() {
-            victoryScreen.classList.add('hidden');
-            pauseScreen.classList.add('hidden');
-            startScreen.classList.add('hidden');
-            
+            gameStarted = true; // Сразу начинаем заново
             isPaused = false;
-            gameStarted = true; 
-            
             placedBooks = 0;
             scoreElement.innerText = placedBooks;
             
+            // Восстановление UI после победы
+            pile.style.opacity = '1';
+            pile.style.pointerEvents = 'auto';
+            victoryText.style.opacity = '0';
+            timerLabel.innerHTML = 'Время: <span id="timer-display">00:00</span>';
+            
+            startBtn.classList.add('hidden-btn');
+            pauseBtn.classList.remove('hidden-btn');
+            resetBtn.classList.remove('hidden-btn');
+            startBtn.innerText = "Начать"; // Возвращаем текст
+            pauseScreen.style.display = 'none';
+            
             stopTimer();
             secondsElapsed = 0;
-            updateTimerDisplay();
             
             allBooks.forEach(book => {
                 pile.appendChild(book); 
                 randomizeBookInPile(book); 
             });
-
             startTimer();
         }
 
-        // --- ТАЙМЕР И ПАУЗА ---
         function startTimer() {
             if(!timerInterval) {
                 timerInterval = setInterval(() => {
                     if(!isPaused && gameStarted) {
                         secondsElapsed++;
-                        updateTimerDisplay();
+                        document.getElementById('timer-display').innerText = formatTime(secondsElapsed);
                     }
                 }, 1000);
             }
         }
 
-        function stopTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
-        }
-
-        function updateTimerDisplay() {
-            let m = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
-            let s = (secondsElapsed % 60).toString().padStart(2, '0');
-            timerDisplay.innerText = `${m}:${s}`;
+        function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
+        function formatTime(sec) {
+            return Math.floor(sec / 60).toString().padStart(2, '0') + ':' + (sec % 60).toString().padStart(2, '0');
         }
 
         function togglePause() {
-            if (!gameStarted) return; 
-            
+            if (!gameStarted || placedBooks >= totalBooks) return; 
             isPaused = !isPaused;
-            if (isPaused) {
-                pauseScreen.classList.remove('hidden');
-            } else {
-                pauseScreen.classList.add('hidden');
-            }
+            pauseScreen.style.display = isPaused ? 'flex' : 'none';
         }
 
-        // --- DRAG & DROP ФУНКЦИИ ---
-        function dragStart(e) {
-            // Во время победы dragStart тоже не должен работать
-            if (!gameStarted || isPaused || placedBooks >= totalBooks) {
-                e.preventDefault();
-                return false;
-            }
-            e.dataTransfer.setData("text", e.target.id);
-            setTimeout(() => {
-                if (e.target) e.target.style.opacity = '0.4';
-            }, 0);
-        }
-
-        function allowDrop(e) { e.preventDefault(); }
-
-        function dragEnterZone(e) {
-            if (!gameStarted || isPaused || placedBooks >= totalBooks) return;
-            e.preventDefault();
-            e.currentTarget.classList.add('drag-over');
-        }
-        
-        function dragLeaveZone(e) {
-            e.currentTarget.classList.remove('drag-over');
-        }
-
-        function dropOnShelf(e) {
-            if (!gameStarted || isPaused || placedBooks >= totalBooks) return;
-            e.preventDefault();
-            let shelf = e.currentTarget;
-            shelf.classList.remove('drag-over');
-
-            let bookId = e.dataTransfer.getData("text");
-            let book = document.getElementById(bookId);
-            
-            if (book) {
-                let source = book.parentElement;
+        function checkVictory() {
+            if (placedBooks >= totalBooks) {
+                stopTimer();
+                // Меняем кнопки
+                pauseBtn.classList.add('hidden-btn');
+                resetBtn.classList.add('hidden-btn');
+                startBtn.classList.remove('hidden-btn');
+                startBtn.innerText = "Начать заново";
                 
-                if (source.id === 'book-pile') {
-                    placedBooks++;
-                    scoreElement.innerText = placedBooks;
-                }
+                // Меняем текст таймера
+                timerLabel.innerHTML = 'Итог: <span id="timer-display">' + formatTime(secondsElapsed) + '</span>';
                 
-                book.style.opacity = '1';
-                shelf.appendChild(book); 
+                // Показываем надпись
+                pile.style.opacity = '0';
+                pile.style.pointerEvents = 'none';
+                victoryText.style.opacity = '1';
                 
-                checkVictory();
+                createExplosion();
             }
         }
-
-        function dropOnPile(e) {
-            if (!gameStarted || isPaused || placedBooks >= totalBooks) return;
-            e.preventDefault();
-            let pileZone = e.currentTarget;
-            pileZone.classList.remove('drag-over');
-
-            let bookId = e.dataTransfer.getData("text");
-            let book = document.getElementById(bookId);
-
-            if (book) {
-                let source = book.parentElement;
-                
-                if (source.classList.contains('shelf')) {
-                    placedBooks--;
-                    scoreElement.innerText = placedBooks;
-                }
-
-                book.style.opacity = '1';
-                pileZone.appendChild(book);
-                randomizeBookInPile(book); 
-            }
-        }
-
-        document.addEventListener('dragend', function(e) {
-            if(e.target.classList.contains('book')) {
-                e.target.style.opacity = '1';
-            }
-        });
 
         function randomizeBookInPile(book) {
+            let isMobile = window.innerWidth <= 900 || window.innerHeight <= 500;
+            let radiusX = isMobile ? 120 : 140;
+            let radiusY = isMobile ? 70 : 100;
+            let centerX = isMobile ? 140 : 165;
+            let centerY = isMobile ? 90 : 125;
+
             let angle = Math.random() * Math.PI * 2;
-            let radius = Math.random() * 100;
-            let x = 175 + radius * Math.cos(angle) - 9;
-            let y = 125 + radius * Math.sin(angle) - 40;
+            let r = Math.random();
+            let x = centerX + Math.sqrt(r) * radiusX * Math.cos(angle) - (isMobile ? 5 : 9);
+            let y = centerY + Math.sqrt(r) * radiusY * Math.sin(angle) - (isMobile ? 22 : 40);
             let rotation = Math.random() * 180 - 90;
 
             book.style.position = 'absolute';
@@ -519,12 +406,118 @@
             book.style.zIndex = Math.floor(Math.random() * 200);
         }
 
-        function checkVictory() {
-            if (placedBooks >= totalBooks) {
-                stopTimer();
-                document.getElementById('final-time').innerText = timerDisplay.innerText;
-                victoryScreen.classList.remove('hidden');
-                createExplosion();
+        // --- ПК DRAG & DROP (Мышь) ---
+        function dragStart(e) {
+            if (!gameStarted || isPaused || placedBooks >= totalBooks) { e.preventDefault(); return; }
+            e.dataTransfer.setData("text", e.target.id);
+            setTimeout(() => e.target.style.opacity = '0.4', 0);
+        }
+        
+        shelves.forEach(shelf => {
+            shelf.addEventListener('dragover', e => e.preventDefault());
+            shelf.addEventListener('dragenter', e => e.currentTarget.classList.add('drag-over'));
+            shelf.addEventListener('dragleave', e => e.currentTarget.classList.remove('drag-over'));
+            shelf.addEventListener('drop', e => processDrop(e, e.currentTarget));
+        });
+
+        pile.addEventListener('dragover', e => e.preventDefault());
+        pile.addEventListener('dragenter', e => e.currentTarget.classList.add('drag-over'));
+        pile.addEventListener('dragleave', e => e.currentTarget.classList.remove('drag-over'));
+        pile.addEventListener('drop', e => processDrop(e, e.currentTarget, true));
+
+        document.addEventListener('dragend', e => { if(e.target.classList.contains('book')) e.target.style.opacity = '1'; });
+
+        function processDrop(e, targetZone, isPile = false) {
+            e.preventDefault();
+            targetZone.classList.remove('drag-over');
+            let book = document.getElementById(e.dataTransfer.getData("text"));
+            if (!book) return;
+            moveBook(book, targetZone, isPile);
+        }
+
+        // --- МОБИЛЬНЫЙ DRAG & DROP (Сенсор) ---
+        let draggedBook = null;
+        let touchOffsetX = 0; let touchOffsetY = 0;
+        let initialParent = null;
+
+        function touchStart(e) {
+            if (!gameStarted || isPaused || placedBooks >= totalBooks) return;
+            e.preventDefault(); 
+            draggedBook = e.target;
+            initialParent = draggedBook.parentElement;
+            
+            const touch = e.touches[0];
+            const rect = draggedBook.getBoundingClientRect();
+            touchOffsetX = touch.clientX - rect.left;
+            touchOffsetY = touch.clientY - rect.top;
+            
+            draggedBook.style.opacity = '0.7';
+            draggedBook.style.zIndex = '1000';
+            
+            // Отрываем книгу и привязываем к экрану для свободного перемещения
+            if (initialParent !== document.body) {
+                draggedBook.style.position = 'absolute';
+                draggedBook.style.left = rect.left + 'px';
+                draggedBook.style.top = rect.top + 'px';
+                draggedBook.style.transform = 'none'; 
+                document.body.appendChild(draggedBook);
+            }
+        }
+
+        function touchMove(e) {
+            if (!draggedBook) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            draggedBook.style.left = (touch.clientX - touchOffsetX) + 'px';
+            draggedBook.style.top = (touch.clientY - touchOffsetY) + 'px';
+        }
+
+        function touchEnd(e) {
+            if (!draggedBook) return;
+            const touch = e.changedTouches[0];
+            
+            // Прячем временно, чтобы узнать, что находится под пальцем
+            draggedBook.style.display = 'none';
+            let dropElement = document.elementFromPoint(touch.clientX, touch.clientY);
+            draggedBook.style.display = 'block';
+            
+            draggedBook.style.opacity = '1';
+            draggedBook.style.zIndex = '';
+
+            let targetShelf = dropElement ? dropElement.closest('.shelf') : null;
+            let targetPile = dropElement ? dropElement.closest('#book-pile') : null;
+
+            // Восстанавливаем родителя перед перемещением, чтобы moveBook корректно посчитал очки
+            initialParent.appendChild(draggedBook); 
+
+            if (targetShelf) {
+                moveBook(draggedBook, targetShelf, false);
+            } else if (targetPile) {
+                moveBook(draggedBook, pile, true);
+            } else {
+                // Если бросили мимо - возвращаем туда, откуда взяли
+                moveBook(draggedBook, initialParent, initialParent.id === 'book-pile');
+            }
+            draggedBook = null;
+        }
+
+        // Общая логика перемещения и подсчета очков (для мыши и сенсора)
+        function moveBook(book, targetZone, isPile) {
+            let sourcePile = book.parentElement.id === 'book-pile';
+            
+            book.style.opacity = '1';
+            targetZone.appendChild(book);
+
+            if (!isPile && sourcePile) {
+                placedBooks++;
+                scoreElement.innerText = placedBooks;
+                checkVictory();
+            } else if (isPile) {
+                if (!sourcePile) {
+                    placedBooks--;
+                    scoreElement.innerText = placedBooks;
+                }
+                randomizeBookInPile(book);
             }
         }
 
@@ -533,62 +526,41 @@
         const ctx = canvas.getContext('2d');
         let width, height, particles = [];
 
-        function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
+        function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
 
         class Particle {
             constructor(x, y, isExplosion = false) {
-                this.x = x || Math.random() * width;
-                this.y = y || Math.random() * height;
+                this.x = x || Math.random() * width; this.y = y || Math.random() * height;
                 this.size = Math.random() * 2 + 0.5;
                 this.vx = isExplosion ? (Math.random() - 0.5) * 12 : (Math.random() - 0.5) * 0.4;
                 this.vy = isExplosion ? (Math.random() - 0.5) * 12 : (Math.random() * -1) - 0.1;
                 this.life = isExplosion ? Math.random() * 80 + 20 : 999999;
-                
                 const colors = ['#ffd700', '#ffb6c1', '#ffffff', '#ff8c00'];
                 this.color = colors[Math.floor(Math.random() * colors.length)];
                 this.glow = Math.random() * 8 + 2;
             }
-
             update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.life--;
-
-                if (this.y < 0) this.y = height;
-                if (this.x < 0) this.x = width;
-                if (this.x > width) this.x = 0;
+                this.x += this.vx; this.y += this.vy; this.life--;
+                if (this.y < 0) this.y = height; if (this.x < 0) this.x = width; if (this.x > width) this.x = 0;
             }
-
             draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = this.glow;
-                ctx.shadowColor = this.color;
-                ctx.fill();
-                ctx.shadowBlur = 0; 
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color; ctx.shadowBlur = this.glow; ctx.shadowColor = this.color;
+                ctx.fill(); ctx.shadowBlur = 0; 
             }
         }
 
         for (let i = 0; i < 150; i++) particles.push(new Particle());
 
         function createExplosion() {
-            for (let i = 0; i < 400; i++) {
-                particles.push(new Particle(width/2, height/2, true));
-            }
+            for (let i = 0; i < 400; i++) particles.push(new Particle(width/2, height/2, true));
         }
 
         function animateParticles() {
             ctx.clearRect(0, 0, width, height);
             for (let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i];
-                p.update();
-                p.draw();
+                let p = particles[i]; p.update(); p.draw();
                 if (p.life <= 0) particles.splice(i, 1);
             }
             requestAnimationFrame(animateParticles);
